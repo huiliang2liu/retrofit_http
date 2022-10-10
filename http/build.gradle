@@ -44,7 +44,7 @@ boolean hasWeb = false
 
 var PUB_GROUP_ID = "com.lhl.http"
 var PUB_ARTIFACT_ID = "http"
-var PUB_CORE_VERSION = "1.0.0"
+var PUB_CORE_VERSION = "1.0.1"
 var PUBLISH_URL = "/Users/liuhuiliang/work/gitMaven"
 var PUBLISH_USERNAME = "deployment"
 var PUBLISH_PASSWORD = "000000"

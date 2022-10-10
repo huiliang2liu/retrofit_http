@@ -1,11 +1,15 @@
 package com.xh.http;
 
+import android.content.Context;
+
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import okhttp3.Cache;
 import okhttp3.Dns;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
@@ -27,8 +31,12 @@ public class RetrofitOkhttpBuilder {
     private long connectTimeout = 8;
     private long readTimeout = 8;
     private long writeTimeout = 8;
+    private int retryTime = 0;
     private List<String> filters = new ArrayList<>();
     private Dns dns = Dns.SYSTEM;
+    private File cache;
+    private Context context;
+    private long cacheSize = 10 * 1024 * 1024;
 
     public RetrofitOkhttpBuilder(String base) {
         assert base != null && !base.isEmpty() : "base is empty";
@@ -95,6 +103,27 @@ public class RetrofitOkhttpBuilder {
         return this;
     }
 
+    public RetrofitOkhttpBuilder setRetryTime(int retryTime) {
+        this.retryTime = retryTime;
+        return this;
+    }
+
+    public RetrofitOkhttpBuilder setCache(File cache, Context context) {
+        this.cache = cache;
+        this.context = context;
+        return this;
+    }
+
+    public RetrofitOkhttpBuilder setCache(Context context) {
+        this.context = context;
+        return this;
+    }
+
+    public RetrofitOkhttpBuilder setCacheSize(long cacheSize) {
+        this.cacheSize = cacheSize;
+        return this;
+    }
+
     public <T> T build(Class<T> clazz) {
         if (retrofitMap.containsKey(clazz))
             return (T) retrofitMap.get(clazz);
@@ -112,10 +141,19 @@ public class RetrofitOkhttpBuilder {
             clientBuilder.dns(dns);
             if (openCrossDomainRedirect)
                 clientBuilder.addInterceptor(new HttpRedirectInterceptor());
-            if (openLog)
-                clientBuilder.addInterceptor(new HttpLoggingInterceptor().setFilters(filters));
             for (Interceptor interceptor : interceptors) {
                 clientBuilder.addInterceptor(interceptor);
+            }
+            if (openLog)
+                clientBuilder.addInterceptor(new HttpLoggingInterceptor().setFilters(filters));
+            if (retryTime > 0) {
+                clientBuilder.addInterceptor(new RetryInterceptor(retryTime));
+            }
+            if (context != null) {
+                if (cache == null)
+                    cache = new File(context.getCacheDir(), "okhttp");
+                clientBuilder.cache(new Cache(cache, cacheSize));
+                clientBuilder.addInterceptor(new CacheInterceptor(context));
             }
             for (Interceptor interceptor : networkInterceptors) {
                 clientBuilder.addNetworkInterceptor(interceptor);
