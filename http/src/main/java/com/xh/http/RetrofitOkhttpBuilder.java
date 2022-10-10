@@ -13,6 +13,7 @@ import okhttp3.Cache;
 import okhttp3.Dns;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
+import retrofit2.CallAdapter;
 import retrofit2.Converter;
 import retrofit2.Retrofit;
 
@@ -37,6 +38,7 @@ public class RetrofitOkhttpBuilder {
     private File cache;
     private Context context;
     private long cacheSize = 10 * 1024 * 1024;
+    private CallAdapter.Factory callAdapterFactory;
 
     public RetrofitOkhttpBuilder(String base) {
         assert base != null && !base.isEmpty() : "base is empty";
@@ -124,6 +126,11 @@ public class RetrofitOkhttpBuilder {
         return this;
     }
 
+    public RetrofitOkhttpBuilder setCallAdapterFactory(CallAdapter.Factory callAdapterFactory) {
+        this.callAdapterFactory = callAdapterFactory;
+        return this;
+    }
+
     public <T> T build(Class<T> clazz) {
         if (retrofitMap.containsKey(clazz))
             return (T) retrofitMap.get(clazz);
@@ -159,6 +166,8 @@ public class RetrofitOkhttpBuilder {
                 clientBuilder.addNetworkInterceptor(interceptor);
             }
             builder.client(clientBuilder.build());
+            if (callAdapterFactory != null)
+                builder.addCallAdapterFactory(callAdapterFactory);
             T t = builder.build().create(clazz);
             retrofitMap.put(clazz, t);
             return t;
