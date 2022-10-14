@@ -19,16 +19,17 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ApiTest apiTest = new RetrofitOkhttpBuilder("https://pay.imobybox.com")
+                .setCache(getApplicationContext())
                 .setFactory(GsonConverterFactory.create()).build(ApiTest.class);
         try {
-            apiTest.create(new ApiTest.Entity()).enqueue(new Callback<String>() {
+            apiTest.create(new ApiTest.Entity()).enqueue(new Callback<Object>() {
                 @Override
-                public void onResponse(Call<String> call, Response<String> response) {
-
+                public void onResponse(Call<Object> call, Response<Object> response) {
+                    Log.e("=====","response");
                 }
 
                 @Override
-                public void onFailure(Call<String> call, Throwable t) {
+                public void onFailure(Call<Object> call, Throwable t) {
                     Log.e("======","",t);
                 }
             });

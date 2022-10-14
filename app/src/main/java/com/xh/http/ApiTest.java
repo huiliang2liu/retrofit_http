@@ -6,7 +6,7 @@ import retrofit2.http.POST;
 
 public interface ApiTest {
     @POST("api/front/order/create")
-    Call<String> create(@Body Entity entity);
+    Call<Object> create(@Body Entity entity);
 
     public static class Entity {
         public String app_id = "mobybox";
