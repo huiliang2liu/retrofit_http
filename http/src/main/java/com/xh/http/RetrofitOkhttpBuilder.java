@@ -3,6 +3,7 @@ package com.xh.http;
 import android.content.Context;
 
 import java.io.File;
+import java.net.Proxy;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -39,6 +40,7 @@ public class RetrofitOkhttpBuilder {
     private Context context;
     private long cacheSize = 10 * 1024 * 1024;
     private CallAdapter.Factory callAdapterFactory;
+    private boolean needProxy = false;
 
     public RetrofitOkhttpBuilder(String base) {
         assert base != null && !base.isEmpty() : "base is empty";
@@ -121,6 +123,11 @@ public class RetrofitOkhttpBuilder {
         return this;
     }
 
+    public RetrofitOkhttpBuilder setNeedProxy(boolean needProxy) {
+        this.needProxy = needProxy;
+        return this;
+    }
+
     public RetrofitOkhttpBuilder setCacheSize(long cacheSize) {
         this.cacheSize = cacheSize;
         return this;
@@ -145,6 +152,9 @@ public class RetrofitOkhttpBuilder {
                     .connectTimeout(connectTimeout, TimeUnit.SECONDS)
                     .readTimeout(readTimeout, TimeUnit.SECONDS)
                     .writeTimeout(writeTimeout, TimeUnit.SECONDS);
+//                    .proxy(Proxy.NO_PROXY);
+            if (!needProxy)
+                clientBuilder.proxy(Proxy.NO_PROXY);
             clientBuilder.dns(dns);
             if (openCrossDomainRedirect)
                 clientBuilder.addInterceptor(new HttpRedirectInterceptor());
